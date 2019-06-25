@@ -9,17 +9,13 @@ import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.core.userdetails.UserDetailsService
 
 
-
-
-
 @Configuration
-class SecurityConfig : WebSecurityConfigurerAdapter(){
+class SecurityConfig : WebSecurityConfigurerAdapter() {
     override fun configure(auth: AuthenticationManagerBuilder) {
         val encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder()
-        auth.parentAuthenticationManager(authenticationManagerBean())
-                .inMemoryAuthentication()
+        auth.inMemoryAuthentication()
                 .passwordEncoder(encoder)
-                .withUser("aa").password("bb").roles("USER", "ADMIN")
+                .withUser("aa").password(encoder.encode("bb")).roles("USER", "ADMIN")
     }
 
     @Bean
@@ -29,6 +25,6 @@ class SecurityConfig : WebSecurityConfigurerAdapter(){
 
     @Bean
     override fun userDetailsService(): UserDetailsService {
-        return super.userDetailsService()
+        return super.userDetailsServiceBean()
     }
 }
