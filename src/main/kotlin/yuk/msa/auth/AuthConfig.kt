@@ -8,19 +8,20 @@ import org.springframework.security.oauth2.config.annotation.configurers.ClientD
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer
-
-
+import org.springframework.security.oauth2.provider.token.AccessTokenConverter
+import org.springframework.security.oauth2.provider.token.TokenStore
 
 @Configuration
 class AuthConfig(private val authenticationManager: AuthenticationManager,
-                 private val userDetailsService: UserDetailsService) : AuthorizationServerConfigurerAdapter(){
+                 private val userDetailsService: UserDetailsService,
+                 private val tokenStore: TokenStore) : AuthorizationServerConfigurerAdapter() {
 
     override fun configure(clients: ClientDetailsServiceConfigurer) {
         clients.inMemory()
                 .withClient("msa")
                 .secret(PasswordEncoderFactories.createDelegatingPasswordEncoder().encode("aa"))
-                .authorizedGrantTypes("refresh_token","password","client_credentials")
-                .scopes("web","mobile")
+                .authorizedGrantTypes("refresh_token", "password", "client_credentials")
+                .scopes("web", "mobile")
     }
 
     override fun configure(server: AuthorizationServerSecurityConfigurer) {
@@ -30,7 +31,8 @@ class AuthConfig(private val authenticationManager: AuthenticationManager,
     }
 
     override fun configure(endpoints: AuthorizationServerEndpointsConfigurer) {
-        endpoints.authenticationManager(authenticationManager)
+        endpoints.tokenStore(tokenStore)
+                .authenticationManager(authenticationManager)
                 .userDetailsService(userDetailsService)
     }
 }
