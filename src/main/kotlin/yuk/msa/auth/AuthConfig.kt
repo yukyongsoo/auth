@@ -14,7 +14,8 @@ import org.springframework.security.oauth2.provider.token.TokenStore
 @Configuration
 class AuthConfig(private val authenticationManager: AuthenticationManager,
                  private val userDetailsService: UserDetailsService,
-                 private val tokenStore: TokenStore) : AuthorizationServerConfigurerAdapter() {
+                 private val tokenStore: TokenStore,
+                 private val accessTokenConverter: AccessTokenConverter) : AuthorizationServerConfigurerAdapter() {
 
     override fun configure(clients: ClientDetailsServiceConfigurer) {
         clients.inMemory()
@@ -26,13 +27,15 @@ class AuthConfig(private val authenticationManager: AuthenticationManager,
 
     override fun configure(server: AuthorizationServerSecurityConfigurer) {
         server.tokenKeyAccess("permitAll()")
-                .checkTokenAccess("permitAll()")
+                .checkTokenAccess("isAuthenticated()")
                 .allowFormAuthenticationForClients()
     }
 
     override fun configure(endpoints: AuthorizationServerEndpointsConfigurer) {
-        endpoints.tokenStore(tokenStore)
+        endpoints
                 .authenticationManager(authenticationManager)
+                .tokenStore(tokenStore)
                 .userDetailsService(userDetailsService)
+                .accessTokenConverter(accessTokenConverter)
     }
 }
